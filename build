@@ -1,0 +1,35 @@
+name: Build Helium‑macOS
+
+on:
+  push:
+    branches:
+      - main  # 或你想自动构建的分支
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install Homebrew
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+      - name: Install dependencies
+        run: |
+          brew install python@3 llvm ninja coreutils readline xz zlib node
+          pip3 install httplib2
+          brew unlink binutils || true
+
+      - name: Build Helium
+        run: |
+          chmod +x build.sh
+          ./build.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: helium-dmg
+          path: build/*.dmg
